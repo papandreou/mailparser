@@ -38,7 +38,7 @@ this.foldLine = function(str, maxLength, foldAnywhere, afterSpace){
     
     // read in <maxLength> bytes and try to fold it
     while(line = str.substr(curpos, maxLength)){
-        if(!!foldAnywhere){
+        if(foldAnywhere){
             response += line;
             if(curpos+maxLength<str.length){
                 response+="\r\n";
