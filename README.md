@@ -25,37 +25,37 @@ Create a new *mailparser* object
 
     var MailParser = require("mailparser").MailParser,
         mp = new MailParser();
-    
+
 Set up listener for different events
 
   * Get mail headers as a structured object
-    
+
         mp.on("headers", function(headers){
             console.log(headers);
         });
-  
+
   * Get mail body as a structured object
-    
+
         mp.on("body", function(body){
             console.log(body);
         });
-  
+
   * Get info about binary attachment that is about to start streaming
-    
+
         mp.on("astart", function(id, headers){
             console.log("attachment id" + id +" started);
             console.log(headers);
         });
-  
+
   * Get part of a binary attachment in the form of a Buffer
-    
+
         mp.on("astream", function(id, buffer){
             console.log("attachment id" + id);
             console.log(buffer);
         });
-  
+
   * Attachment parsing completed
-  
+
         mp.on("aend", function(id){
             console.log("attachment " + id + " finished");
         });
@@ -71,7 +71,7 @@ Feed the parser with data
 Finish the feeding
 
     mp.end();
-    
+
 Outcome
 -------
 
@@ -87,7 +87,7 @@ Parser returns the headers object with *"header"* event and it's structured like
     , messageDate: 1286458909000
     , receivedDate: 1286743827944
     , contentTransferEncoding: '7bit'
-    , addressesFrom: 
+    , addressesFrom:
        [ { address: 'andris.reinman@gmail.com'
          , name: 'Andris Reinman'
          }
