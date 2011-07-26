@@ -2,9 +2,8 @@
 try{
     var Iconv = require("iconv").Iconv;
 }catch(E){
-    var errmsg = "\n\nNB!\n - You need to install node-iconv in order to use "+
-                 "Mailparser!\n - See http://github.com/bnoordhuis/node-iconv\n"
-    throw new ReferenceError(errmsg);
+    throw new ReferenceError("\n\nNB!\n - You need to install node-iconv in order to use "+
+                             "Mailparser!\n - See http://github.com/bnoordhuis/node-iconv\n");
 }
 /* mime related functions - encoding/decoding etc*/
 /* TODO: Only UTF-8 and Latin1 are allowed with encodeQuotedPrintable */
@@ -63,7 +62,7 @@ this.foldLine = function(str, maxLength, foldAnywhere, afterSpace){
 
     // return folded string
     return response;
-}
+};
 
 
 /**
@@ -94,7 +93,7 @@ this.encodeMimeWord = function(str, encoding, charset){
     }
 
     return "=?"+charset+"?"+encoding+"?"+str+"?=";
-}
+};
 
 /**
  * mime.decodeMimeWord(str, encoding, charset) -> String
@@ -122,7 +121,7 @@ this.decodeMimeWord = function(str){
     }
 
     return text;
-}
+};
 
 
 /**
@@ -173,7 +172,7 @@ this.encodeQuotedPrintable = function(str, mimeWord, charset){
     }
 
     return str;
-}
+};
 
 /**
  * mime.deccodeQuotedPrintable(str, mimeWord, charset) -> String
@@ -204,7 +203,7 @@ this.decodeQuotedPrintable = function(str, mimeWord, charset){
         }
     }
     return str;
-}
+};
 
 /**
  * mime.encodeBase64(str) -> String
@@ -220,7 +219,7 @@ this.encodeBase64 = function(str, charset){
     else
         buffer = new Buffer(str, "UTF-8");
     return buffer.toString("base64");
-}
+};
 
 /**
  * mime.decodeBase64(str) -> String
@@ -239,7 +238,7 @@ this.decodeBase64 = function(str, charset){
 
     // defaults to utf-8
     return buffer.toString("UTF-8");
-}
+};
 
 /**
  * mime.parseHeaders(headers) -> Array
@@ -268,7 +267,7 @@ this.parseHeaders = function(headers){
     }
 
     return header_lines;
-}
+};
 
 /**
  * mime.parseAddresses(addresses) -> Array
@@ -280,11 +279,11 @@ this.parseAddresses = function(addresses){
     if(!addresses)
         return {};
 
-    addresses = addresses.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, (function(a){return this.decodeMimeWord(a)}).bind(this));
+    addresses = addresses.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, (function(a){return this.decodeMimeWord(a);}).bind(this));
 
     // not sure if it's even needed - urlencode escaped \\ and \" and \'
-    addresses = addresses.replace(/\\\\/g,function(a){return escape(a.charAt(1))});
-    addresses = addresses.replace(/\\["']/g,function(a){return escape(a.charAt(1))});
+    addresses = addresses.replace(/\\\\/g,function(a){return escape(a.charAt(1));});
+    addresses = addresses.replace(/\\["']/g,function(a){return escape(a.charAt(1));});
 
     var list = addresses.split(","), address, addressArr = [], name, email;
     for(var i=0, len=list.length; i<len; i++){
@@ -316,7 +315,7 @@ this.parseAddresses = function(addresses){
             addressArr.push({address:address, name:false});
     }
     return addressArr;
-}
+};
 
 /**
  * mime.parseMimeWords(str) -> String
@@ -328,7 +327,7 @@ this.parseMimeWords = function(str){
     return str.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, (function(a){
         return this.decodeMimeWord(a);
     }).bind(this));
-}
+};
 
 /**
  * mime.parseHeaderLine(line) -> Object
@@ -352,7 +351,7 @@ this.parseHeaderLine = function(line){
         }
     }
     return result;
-}
+};
 
 /* Helper functions */
 
@@ -383,8 +382,8 @@ function lineEdges(str){
  * Converts a buffer in <charset> codepage into UTF-8 string
  **/
 function fromCharset(charset, buffer, keep_buffer){
-    var iconv = new Iconv(charset,'UTF-8'),
-        buffer = iconv.convert(buffer);
+    var iconv = new Iconv(charset,'UTF-8');
+    buffer = iconv.convert(buffer);
     return keep_buffer?buffer:buffer.toString("utf-8");
 }
 
@@ -396,8 +395,7 @@ function fromCharset(charset, buffer, keep_buffer){
  * Converts a string or buffer to <charset> codepage
  **/
 function toCharset(charset, buffer){
-    var iconv = new Iconv('UTF-8',charset);
-    return iconv.convert(buffer);
+    return new Iconv('UTF-8',charset).convert(buffer);
 }
 
 /**
@@ -414,7 +412,7 @@ function decodeBytestreamUrlencoding(encoded_string){
             buffer_length = encoded_string.length - (prcnts.length*2),
         buffer = new Buffer(buffer_length);
 
-    for(var i=0; i<encoded_string.length; i++){
+    for(i=0; i<encoded_string.length; i++){
         c = encoded_string.charCodeAt(i);
         if(c=="37"){ // %
             c = parseInt(encoded_string.substr(i+1,2), 16);
