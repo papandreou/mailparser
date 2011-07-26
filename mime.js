@@ -416,7 +416,7 @@ function decodeBytestreamUrlencoding(encoded_string){
 
     for(i=0; i<encoded_string.length; i++){
         c = encoded_string.charCodeAt(i);
-        if(c=="37"){ // %
+        if(c === 37){ // %
             c = parseInt(encoded_string.substr(i+1,2), 16);
             i+=2;
         }
