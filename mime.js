@@ -138,7 +138,7 @@ mime.decodeMimeWord = function(str){
  * Encodes a string into Quoted-printable format.
  **/
 mime.encodeQuotedPrintable = function(str, mimeWord, charset){
-    charset = charset || "UTF-8";
+    charset = charset || "UTF-8";
 
     /*
      * Characters from 33-126 OK (except for =; and ?_ when in mime word mode)
