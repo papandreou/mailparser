@@ -6,7 +6,8 @@ try{
                              "Mailparser!\n - See http://github.com/bnoordhuis/node-iconv\n");
 }
 
-var mime = module.exports = {};
+var mime = module.exports = {},
+    matchEncodedWordRegExp = /=\?[^?]+\?[QB]\?[^?]+\?=/gi;
 
 /* mime related functions - encoding/decoding etc*/
 /* TODO: Only UTF-8 and Latin1 are allowed with encodeQuotedPrintable */
@@ -282,7 +283,7 @@ mime.parseAddresses = function(addresses){
     if(!addresses)
         return {};
 
-    addresses = addresses.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, mime.decodeMimeWord);
+    addresses = addresses.replace(matchEncodedWordRegExp, mime.decodeMimeWord);
 
     // not sure if it's even needed - urlencode escaped \\ and \" and \'
     addresses = addresses.replace(/\\\\/g,function(a){return escape(a.charAt(1));});
@@ -327,7 +328,7 @@ mime.parseAddresses = function(addresses){
  * Parses mime-words into UTF-8 strings
  **/
 mime.parseMimeWords = function(str){
-    return str.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, mime.decodeMimeWord);
+    return str.replace(matchEncodedWordRegExp, mime.decodeMimeWord);
 };
 
 /**
