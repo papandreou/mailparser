@@ -5,6 +5,9 @@ try{
     throw new ReferenceError("\n\nNB!\n - You need to install node-iconv in order to use "+
                              "Mailparser!\n - See http://github.com/bnoordhuis/node-iconv\n");
 }
+
+var mime = module.exports = {};
+
 /* mime related functions - encoding/decoding etc*/
 /* TODO: Only UTF-8 and Latin1 are allowed with encodeQuotedPrintable */
 /* TODO: Check if the input string even needs encoding                */
@@ -26,7 +29,7 @@ try{
  *      boundary="----bd_n3-lunchhour1283962663300----"
  *
  **/
-this.foldLine = function(str, maxLength, foldAnywhere, afterSpace){
+mime.foldLine = function(str, maxLength, foldAnywhere, afterSpace){
     var line=false, curpos=0, response="", lf;
     maxLength = maxLength || 78;
 
@@ -80,16 +83,16 @@ this.foldLine = function(str, maxLength, foldAnywhere, afterSpace){
  *     =?UTF-8?q?See_on_=C3=B5hin_test?=
  *
  **/
-this.encodeMimeWord = function(str, encoding, charset){
+mime.encodeMimeWord = function(str, encoding, charset){
     charset = charset || "UTF-8";
     encoding = encoding && encoding.toUpperCase() || "B";
 
     if(encoding=="Q"){
-        str = this.encodeQuotedPrintable(str, true, charset);
+        str = mime.encodeQuotedPrintable(str, true, charset);
     }
 
     if(encoding=="B"){
-        str = this.encodeBase64(str);
+        str = mime.encodeBase64(str);
     }
 
     return "=?"+charset+"?"+encoding+"?"+str+"?=";
@@ -105,7 +108,7 @@ this.encodeMimeWord = function(str, encoding, charset){
  *
  **/
 
-this.decodeMimeWord = function(str){
+mime.decodeMimeWord = function(str){
     var parts = str.split("?"),
         charset = parts && parts[1],
         encoding = parts && parts[2],
@@ -113,11 +116,11 @@ this.decodeMimeWord = function(str){
     if(!charset || !encoding || !text)
         return str;
     if(encoding.toUpperCase()=="Q"){
-        return this.decodeQuotedPrintable(text, true, charset);
+        return mime.decodeQuotedPrintable(text, true, charset);
     }
 
     if(encoding.toUpperCase()=="B"){
-        return this.decodeBase64(text);
+        return mime.decodeBase64(text);
     }
 
     return text;
@@ -133,7 +136,7 @@ this.decodeMimeWord = function(str){
  *
  * Encodes a string into Quoted-printable format.
  **/
-this.encodeQuotedPrintable = function(str, mimeWord, charset){
+mime.encodeQuotedPrintable = function(str, mimeWord, charset){
     charset = charset || "UTF-8";
 
     /*
@@ -159,7 +162,7 @@ this.encodeQuotedPrintable = function(str, mimeWord, charset){
         var lines = str.split(/\r?\n/);
         for(var i=0, len = lines.length; i<len; i++){
             if(lines[i].length>76){
-                lines[i] = this.foldLine(lines[i],76, false, true).replace(/\r\n/g,"=\r\n");
+                lines[i] = mime.foldLine(lines[i],76, false, true).replace(/\r\n/g,"=\r\n");
             }
         }
         str = lines.join("\r\n");
@@ -182,7 +185,7 @@ this.encodeQuotedPrintable = function(str, mimeWord, charset){
  *
  * Decodes a string from Quoted-printable format.
  **/
-this.decodeQuotedPrintable = function(str, mimeWord, charset){
+mime.decodeQuotedPrintable = function(str, mimeWord, charset){
     charset = charset && charset.toUpperCase() || "UTF-8";
 
     if(mimeWord){
@@ -212,7 +215,7 @@ this.decodeQuotedPrintable = function(str, mimeWord, charset){
  *
  * Encodes a string into Base64 format. Base64 is mime-word safe.
  **/
-this.encodeBase64 = function(str, charset){
+mime.encodeBase64 = function(str, charset){
     var buffer;
     if(charset && charset.toUpperCase()!="UTF-8")
         buffer = toCharset(charset, str);
@@ -229,7 +232,7 @@ this.encodeBase64 = function(str, charset){
  * Decodes a string from Base64 format. Base64 is mime-word safe.
  * NB! Always returns UTF-8
  **/
-this.decodeBase64 = function(str, charset){
+mime.decodeBase64 = function(str, charset){
     var buffer = new Buffer(str, "base64");
 
     if(charset && charset.toUpperCase()!="UTF-8"){
@@ -247,7 +250,7 @@ this.decodeBase64 = function(str, charset){
  * Parses header lines into an array of objects (see [[parseHeaderLine]])
  * FIXME: This should probably not be here but in "envelope" instead
  **/
-this.parseHeaders = function(headers){
+mime.parseHeaders = function(headers){
     var text, lines, line, i, name, value, cmd, header_lines = {};
     // unfold
     headers = headers.replace(/\r?\n([ \t])/gm," ");
@@ -275,11 +278,11 @@ this.parseHeaders = function(headers){
  *
  * Parses names and addresses from a from, to, cc or bcc line
  **/
-this.parseAddresses = function(addresses){
+mime.parseAddresses = function(addresses){
     if(!addresses)
         return {};
 
-    addresses = addresses.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, (function(a){return this.decodeMimeWord(a);}).bind(this));
+    addresses = addresses.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, mime.decodeMimeWord);
 
     // not sure if it's even needed - urlencode escaped \\ and \" and \'
     addresses = addresses.replace(/\\\\/g,function(a){return escape(a.charAt(1));});
@@ -323,10 +326,8 @@ this.parseAddresses = function(addresses){
  *
  * Parses mime-words into UTF-8 strings
  **/
-this.parseMimeWords = function(str){
-    return str.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, (function(a){
-        return this.decodeMimeWord(a);
-    }).bind(this));
+mime.parseMimeWords = function(str){
+    return str.replace(/=\?[^?]+\?[QqBb]\?[^?]+\?=/g, mime.decodeMimeWord);
 };
 
 /**
@@ -338,7 +339,7 @@ this.parseMimeWords = function(str){
  *   - defaultValue = text/plain
  *   - charset = utf-8
  **/
-this.parseHeaderLine = function(line){
+mime.parseHeaderLine = function(line){
     if(!line)
         return {};
     var result = {}, parts = line.split(";"), pos;
