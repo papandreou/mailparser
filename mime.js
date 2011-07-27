@@ -7,7 +7,8 @@ try{
 }
 
 var mime = module.exports = {},
-    matchEncodedWordRegExp = /=\?[^?]+\?[QB]\?[^?]+\?=/gi;
+    matchEncodedWordRegExp = /=\?[^?]+\?[QB]\?[^?]+\?=/gi,
+    isUtf8RegExp = /^utf-?8$/i;
 
 /* mime related functions - encoding/decoding etc*/
 /* TODO: Only UTF-8 and Latin1 are allowed with encodeQuotedPrintable */
@@ -153,7 +154,7 @@ mime.encodeQuotedPrintable = function(str, mimeWord, charset){
         }
         if(c!=="=" && c.charCodeAt(0)>=33 && c.charCodeAt(0)<=126)
             return c;
-        return c=="="?"=3D":(charset=="UTF-8"?encodeURIComponent(c):escape(c)).replace(/%/g,'=');
+        return c=="="?"=3D":(isUtf8RegExp.test(charset)?encodeURIComponent(c):escape(c)).replace(/%/g,'=');
     });
 
     str = lineEdges(str);
@@ -187,7 +188,7 @@ mime.encodeQuotedPrintable = function(str, mimeWord, charset){
  * Decodes a string from Quoted-printable format.
  **/
 mime.decodeQuotedPrintable = function(str, mimeWord, charset){
-    charset = charset && charset.toUpperCase() || "UTF-8";
+    charset = charset || "UTF-8";
 
     if(mimeWord){
         str = str.replace(/_/g," ");
@@ -195,7 +196,7 @@ mime.decodeQuotedPrintable = function(str, mimeWord, charset){
         str = str.replace(/=\r\n/gm,'');
         str = str.replace(/=$/,"");
     }
-    if(charset == "UTF-8")
+    if(isUtf8RegExp.test(charset))
         str = decodeURIComponent(str.replace(/=/g,"%"));
     else{
         str = str.replace(/=/g,"%");
@@ -218,7 +219,7 @@ mime.decodeQuotedPrintable = function(str, mimeWord, charset){
  **/
 mime.encodeBase64 = function(str, charset){
     var buffer;
-    if(charset && charset.toUpperCase()!="UTF-8")
+    if(isUtf8RegExp.test(charset))
         buffer = toCharset(charset, str);
     else
         buffer = new Buffer(str, "UTF-8");
@@ -236,7 +237,7 @@ mime.encodeBase64 = function(str, charset){
 mime.decodeBase64 = function(str, charset){
     var buffer = new Buffer(str, "base64");
 
-    if(charset && charset.toUpperCase()!="UTF-8"){
+    if(isUtf8RegExp.test(charset)){
         return fromCharset(charset, buffer);
     }
 
